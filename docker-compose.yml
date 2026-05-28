@@ -1,0 +1,66 @@
+services:
+  # 1. İlişkisel Dilbilim Veritabanı
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: nlp_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: nlp_user
+      POSTGRES_PASSWORD: nlp_strong_password
+      POSTGRES_DB: nlp_linguistics
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # 2. Vektör Tabanlı Semantik Veritabanı
+  qdrant-vector:
+    image: qdrant/qdrant:latest
+    container_name: nlp_qdrant
+    restart: always
+    ports:
+      - "6333:6333"
+    volumes:
+      - ./data/qdrant:/qdrant/storage
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # 3. Hibrit NLP Çekirdek Servisi (Python API)
+  nlp-core:
+    build: ./nlp-core
+    container_name: nlp_core_service
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./nlp-core:/app
+    depends_on:
+      - postgres-db
+      - qdrant-vector
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  # 4. Akademik Analitik ve İzleme Paneli (Streamlit UI)
+  nlp-panel:
+    build: ./nlp-panel
+    container_name: nlp_streamlit_panel
+    restart: always
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./nlp-panel:/app
+    depends_on:
+      - nlp-core
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+

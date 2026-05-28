@@ -1,0 +1,10 @@
+# Veritabanı Ham Verileri (Yedeklenmemeli / Commit edilmemeli)
+data/
+
+# Python Önbellek Dosyaları
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Çevre Değişkenleri ve Gizli Dosyalar
+.env
